@@ -44,12 +44,20 @@ x1 = linprog(c2,A2,b2);
 k2 = x1(2);
 n2 = x1(3);
 
-t2 = linspace(10,53);
 v2 = k2*t+n2;
+
+%druga norma
+
+x3 = A\b;
+k3 = x3(1);
+n3 = x3(2);
+
+v3 = k3*t+n3;
 
 hold on;
 plot(a,b,'*')
-plot(t,v)
-plot(t2,v2)
+plot(t,v,'b')
+plot(t,v2,'k')
+plot(t,v3,'r')
 hold off;
 
