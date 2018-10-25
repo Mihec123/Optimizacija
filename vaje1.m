@@ -1,3 +1,12 @@
+%vaje 23.10.2018
+%naloga:
+%iscemo premico, ki se najbolje prilega danim tockam podanih z
+% matrikama a(x-koordiante) in b(y-koordinate) v razlicnih matricnih
+% normah
+% a = [10 26 30 34 39 39 42 46 53 43]';
+% b = [52 48 45 45 58 44 45 42 42 38]';
+
+
 b = [52 48 45 45 58 44 45 42 42 38]';
 a = [10 26 30 34 39 39 42 46 53 43]';
 A = [a ones(length(a),1)];
