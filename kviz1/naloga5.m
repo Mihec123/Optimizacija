@@ -8,10 +8,12 @@ J = [4,5,6];
 % A = [0 1 2 0 0 1 0;-1 4 2 1 0 0 0; 2 1 3 0 -1 0 1];
 % b = [44;110;132];
 % J = [4 6 7];
-[x,vr,y,st] = simpleksMetoda( c,A,b);
+[x,vr,y,st] = simpleksMetoda( c,A,b,J);
+x
+linprog(c,[],[],A,b,zeros(length(c),1))
 
 %drug primer
-c = [-1 -1 0 0 0]';
-A = [1 0 2 1 0;0 1 -1 0 1; 1 1 1 0 0];
-b = [1;1;2];
-[x,vr,y,st] = simpleksMetoda( c,A,b)
+% c = [-1 -1 0 0 0]';
+% A = [1 0 2 1 0;0 1 -1 0 1; 1 1 1 0 0];
+% b = [1;1;2];
+% [x,vr,y,st] = simpleksMetoda( c,A,b)

@@ -1,6 +1,17 @@
-function [ r,s1,s2 ] = najkrog( premice1,premice2 )
+function [ r,s] = najkrog( premice1,premice2 )
 %vrnemo krog z najvecjim radijem r, ki je dolocen s politopom dolocen z
-%premicami. Premice1 so dolocene z y <k*x+n, premice2 pa z y>k*x+n
+%premicami.
+%Vhod:
+%premice1 matrika n1x2 [k n], kjer smatramo da je premica oblike y<=kx+n
+%premice2 matrika n2x2 [k n], kjer smatramo da je premica oblike y>=kx+n
+%Izhod:
+% r radij najvecjega kroga v tem politopu
+% s=(s1,s2) koordinati sredisca kroga
+
+
+%lotimo se tako da izracunamo kot pravokotnice na vsako premico in potem
+%pri vsakem takem kotu pogledamo omejitev te premice
+% (s1+rcos(fi),s2+rsin(fi)) <= y=ax+b (za prvi kvadrant)
 
 pravkot1 = -1./premice1(:,1);
 pravkot2 = -1./premice2(:,1);
@@ -40,10 +51,11 @@ end
 
 [X,FVAL,EXITFLAG] = linprog(c,A,b);
 r = X(1);
+s = X(2:3);
 s1 = X(2);
 s2 = X(3);
 
-%se narisemo (%slika ni ok)
+%se narisemo (%slika ni ok razmerja osi so poroblem)
 x = linspace(3,10);
 figure;
 hold on;

@@ -1,5 +1,20 @@
 function [x,vr,y,st] = simpleksMetoda( c,A,b,J,maxstep)
-%resujemo simpleksno metodo v standardni obliki
+% funkcija izvede postopek simpleksne metode problema min c'x p.p Ax =b,
+% x>=0
+%Vhod: 
+% c nx1 matrika kriterijske funkcije
+% A mxn matrika
+% b mx1 matika
+% J mx1 matrika zacetne bazne resitve, ce ta ni podana jo poiscemo z
+%   dvofazno simpleksno metodo
+% maxstep najvecje stevilo korakov simpleksne metode, ce ga ne podamo
+%   izvedemo najvec 100 korakov
+%Izhod:
+% x nx1 matriak resitev problema
+% vr vrednost kriterijske funkcije pri resitvi x
+% y resitev dualnega problema
+% st stevilo izvedenih korakov simpleksne metode
+
 
 if nargin < 5
     maxstep = 100;
@@ -7,6 +22,9 @@ end
 if nargin < 4
     J = dopustnaResitev(c,A,b)
 end
+
+
+%sledimo navodilom naloge5 iz pdf-ja
 
 V = size(A);
 m = V(1);
@@ -52,8 +70,6 @@ while st<maxstep
 
 end
     
-
-
 
 
 end
