@@ -56,8 +56,9 @@ s1 = X(2);
 s2 = X(3);
 
 %se narisemo (%slika ni ok razmerja osi so poroblem)
-x = linspace(3,10);
+x = linspace(s1-r-3,s1+r+3);
 figure;
+axis([s1-r-3, s1+r+3, s2-r-3, s2+r+3 ])
 hold on;
 for i = 1:length(premice1)
     y = premice1(i,1).*x + premice1(i,2);

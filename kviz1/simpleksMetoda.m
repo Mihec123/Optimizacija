@@ -1,4 +1,4 @@
-function [x,vr,y,st] = simpleksMetoda( c,A,b,J,maxstep)
+function [x,vr,y,st] = simpleksMetoda( c,A,b,J,maxstep,opcija)
 % funkcija izvede postopek simpleksne metode problema min c'x p.p Ax =b,
 % x>=0
 %Vhod: 
@@ -9,18 +9,25 @@ function [x,vr,y,st] = simpleksMetoda( c,A,b,J,maxstep)
 %   dvofazno simpleksno metodo
 % maxstep najvecje stevilo korakov simpleksne metode, ce ga ne podamo
 %   izvedemo najvec 100 korakov
+% opcija 
+%       1 pomeni simpleksna metoda za vhodno spremenljivko izbere tisto z
+%         najmanjso vrednostjo
+%       2 pomeni simpleksna metoda za vhodno spremenljivko izbere tisto z
+%         najmanjsim indeksom
 %Izhod:
 % x nx1 matriak resitev problema
 % vr vrednost kriterijske funkcije pri resitvi x
 % y resitev dualnega problema
 % st stevilo izvedenih korakov simpleksne metode
 
-
+if nargin < 6
+    opcija = 2;
+end
 if nargin < 5
     maxstep = 100;
 end
 if nargin < 4
-    J = dopustnaResitev(c,A,b)
+    J = dopustnaResitev(c,A,b);
 end
 
 
@@ -45,8 +52,17 @@ while st<maxstep
         break;
     else
         temp = cpr;
-        [val,indeks] = min(temp);
-        ro = K(indeks);
+        if opcija == 1
+            %poiscemo najmanjso vrednost za izstopno spremenljivko
+            [val,indeks] = min(temp);
+            ro = K(indeks);
+        else
+            %za izstopno spremenljivko vzamemo tisto z najmanjsim indeksom
+            temp1 = temp<0; %temp1 vsebuje na i-tem mestu 1 ce je cpr(i) <0 in 0 sicer
+            seznam = find(temp1 == 1); % seznam vseh mest enakih 1 (cpr(i) <0)
+            indeks = seznam(1); %vzamemo prvega (najmanjsi indeks)
+            ro = K(indeks);
+        end
         apr = A(:,J)\A(:,ro);
         if apr <= 0
             vr = inf;
