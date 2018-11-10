@@ -38,7 +38,7 @@ n = length(premice1);
 for j = 1:length(premice2)
     k = premice2(j,1);
     if k >0
-        radtodeg(alfa2(j))
+        %radtodeg(alfa2(j))
         %radtodeg(alfa2(j))
         A(n+j,:) = [-sin(alfa2(j))+cos(alfa2(j))*k, k, -1]; %[r(k*cos(fi)-sin(fi)),k*s1,-s2] + fi treba mert iz prave strani
         b(n+j) = -premice2(j,2); %n

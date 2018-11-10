@@ -13,7 +13,9 @@ x
 linprog(c,[],[],A,b,zeros(length(c),1))
 
 %drug primer
-% c = [-1 -1 0 0 0]';
-% A = [1 0 2 1 0;0 1 -1 0 1; 1 1 1 0 0];
-% b = [1;1;2];
-% [x,vr,y,st] = simpleksMetoda( c,A,b)
+c = [-1 -1 0 0 0]';
+A = [1 0 2 1 0;0 1 -1 0 1; 1 1 1 0 0];
+b = [1;1;2];
+[x,vr,y,st] = simpleksMetoda( c,A,b);
+x
+linprog(c,[],[],A,b,zeros(length(c),1))

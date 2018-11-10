@@ -1,4 +1,4 @@
-function [x,vr,y,st] = simpleksMetoda( c,A,b,J,maxstep,opcija)
+function [x,vr,y,st,J] = simpleksMetoda( c,A,b,J,maxstep,opcija)
 % funkcija izvede postopek simpleksne metode problema min c'x p.p Ax =b,
 % x>=0
 %Vhod: 
@@ -46,7 +46,9 @@ while st<maxstep
     xj = A(:,J)\b;
     vr = c(J)'*xj;
     y = A(:,J)'\c(J);
-    cpr = c(K)'-c(J)'*inv(A(:,J))*A(:,K);
+    neki = A(:,J)\A(:,K); %lepsi nacin racunanja produkta z inverzom
+    cpr = c(K)'-c(J)'*neki;
+    %cpr = c(K)'-c(J)'*inv(A(:,J))*A(:,K);
     if cpr >= 0
         x(J) = xj;
         break;
