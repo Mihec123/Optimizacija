@@ -26,8 +26,8 @@ end
 if nargin < 5
     maxstep = 100;
 end
-if nargin < 4
-    J = dopustnaResitev(c,A,b);
+if nargin < 4 || isempty(J)
+    J = dopustnaResitev(c,A,b,maxstep,opcija);
 end
 
 
@@ -55,11 +55,11 @@ while st<maxstep
     else
         temp = cpr;
         if opcija == 1
-            %poiscemo najmanjso vrednost za izstopno spremenljivko
+            %poiscemo najmanjso vrednost za vstopno spremenljivko
             [val,indeks] = min(temp);
             ro = K(indeks);
         else
-            %za izstopno spremenljivko vzamemo tisto z najmanjsim indeksom
+            %za vstopno spremenljivko vzamemo tisto z najmanjsim indeksom
             temp1 = temp<0; %temp1 vsebuje na i-tem mestu 1 ce je cpr(i) <0 in 0 sicer
             seznam = find(temp1 == 1); % seznam vseh mest enakih 1 (cpr(i) <0)
             indeks = seznam(1); %vzamemo prvega (najmanjsi indeks)

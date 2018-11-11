@@ -1,4 +1,4 @@
-function J = menjavaBaze(c,A,b,J,izstopna)
+function J = menjavaBaze(c,A,b,J,izstopna,opcija)
 %funkcija menjavaBaze izvede en korak menjave baze v simpleksni metodi.
 %Funkcija je namenjena menjavi nezazeljenih spremenljivk v 1.fazi dvofazne
 %simpleksne metode (zamnejamo eno dopolnilno spremenljivko za prvo ustrezno)
@@ -9,8 +9,17 @@ function J = menjavaBaze(c,A,b,J,izstopna)
 % b mx1 matika
 % J mx1 matrika trenutne baze
 % izstopna 1x1 matrika z izstopno spremenljivko
+% opcija 
+%       1 pomeni simpleksna metoda za vhodno spremenljivko izbere tisto z
+%         najmanjso vrednostjo
+%       2 pomeni simpleksna metoda za vhodno spremenljivko izbere tisto z
+%         najmanjsim indeksom
 %Izhod:
 % J baze po eni menjavi
+
+if nargin < 6
+    opcija = 2;
+end
 
 V = size(A);
 m = V(1);
@@ -25,11 +34,20 @@ vr = c(J)'*xj;
 y = A(:,J)'\c(J);
 neki = A(:,J)\A(:,K);
 cpr = c(K)'-c(J)'*neki;
-
 temp = cpr;
-temp(temp == 0) = Inf;
-[neki,indeks] = min(temp); %vzamemo najmanji indeks nebazne spremenljivke, ki nima koeficienta 0 ter ga damo v bazo
-ro = K(indeks);
+
+if opcija == 1
+    temp(temp == 0) = Inf;
+    [neki,indeks] = min(temp); %vzamemo najmanjo vrednost nebazne spremenljivke, ki nima koeficienta 0 ter ga damo v bazo
+    ro = K(indeks);
+else
+        %za vstopno spremenljivko vzamemo tisto z najmanjsim indeksom
+    temp1 = temp>0; %temp1 vsebuje na i-tem mestu 1 ce je cpr(i) >0 in 0 sicer
+    seznam = find(temp1 == 1); % seznam vseh mest enakih 1 (cpr(i) <0)
+    indeks = seznam(1); %vzamemo prvega (najmanjsi indeks)
+    ro = K(indeks);
+    
+end
 
 apr = A(:,J)\A(:,ro);
 
