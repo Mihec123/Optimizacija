@@ -46,8 +46,9 @@ while st<maxstep
     xj = A(:,J)\b;
     vr = c(J)'*xj;
     y = A(:,J)'\c(J);
-    neki = A(:,J)\A(:,K); %lepsi nacin racunanja produkta z inverzom
-    cpr = c(K)'-c(J)'*neki;
+    %neki = A(:,J)\A(:,K); %lepsi nacin racunanja produkta z inverzom
+    %cpr = c(K)'-c(J)'*neki;
+    cpr = c(K)'-y'*A(:,K);
     %cpr = c(K)'-c(J)'*inv(A(:,J))*A(:,K);
     if cpr >= 0
         x(J) = xj;
