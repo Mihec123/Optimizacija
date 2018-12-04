@@ -1,4 +1,4 @@
-function [ vrednsot,x,y,s, iter, napaka] = NotranjeTocke_shortstep( x0,y0,c,A,b,sigma)
+function [ vrednsot,x,y,s, iter, napaka] = NotranjeTocke_shortstep( c,A,b,x0,y0,sigma,maxit)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 eps = 1e-6;

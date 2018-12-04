@@ -1,4 +1,4 @@
-function [ vrednsot,x,y,s, iter, napaka] = NotranjeTocke_longstep( x0,y0,c,A,b,sigma)
+function [ vrednsot,x,y,s, iter, napaka] = NotranjeTocke_longstep( c,A,b,x0,y0,sigma,maxit)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -8,7 +8,7 @@ y=y0;
 s=c-A'*y;
 
 vel = size(A);
-n = vel(1);
+n = vel(2);
 
 iter = 0;
 
@@ -19,7 +19,7 @@ end
 
 napaka = x'*s;
 
-while napaka > eps
+while (napaka > eps) && iter < 100 
     iter = iter +1;
     tau = (x'*s)/n;
     mu = sigma*tau;
@@ -33,22 +33,29 @@ while napaka > eps
     alfap = 1;
     napakax = true;
     while napakax
-        xtemp = x-alfap*dx;
-        ytemp = y-alfap*dy;
-        stemp = s-alfap*ds;
-        
-        if prod(double(xtemp > 0)) > 0  && prod(double(stemp > 0)) >0
+        xtemp = x-alfap*dx;      
+        if prod(double(xtemp > 0)) > 0
             napakax = false;
         else
-            alfap = alfap - 0.1;
+            alfap = alfap - 0.05;
+        end          
+    end
+    
+    alfad = 1;
+    napakas = true;
+    while napakas
+        stemp = s-alfad*ds;      
+        if prod(double(stemp > 0)) > 0
+            napakas = false;
+        else
+            alfad = alfad - 0.05;
         end          
     end
     x = xtemp;
-    y = ytemp;
+    y = y - alfad*dy;
     s = stemp;
     
     napaka = x'*s;
-    napaka
 end
 
 vrednsot = c'*x;
