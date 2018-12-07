@@ -61,7 +61,7 @@ vr1 = c(J)'*xj;
 
 %preverimo ce imamo se vedno dopustno resitev, ter da je vrednost
 %kriterijske funkcije enaka kot pred menjavo baze
-if prod(vr1 ~= vr) || prod(xj1 < 0)
+if vr1 ~= vr || prod(xj1 < 0)
     display('menjava baze ni uspela')
 end
 
