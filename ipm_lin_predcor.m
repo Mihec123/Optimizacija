@@ -1,4 +1,4 @@
-function [ vrednost,x,y,s, iter, napaka] = ipm_lin_predcor( c,A,b,x0,s0,sigma,eps,maxit)
+function [ vrednost,x,y,s, iter, napaka] = ipm_lin_predcor( c,A,b,x0,y0,sigma,faktor,eps,maxit)
 % Opis:
 %   ipm_lin_predcor metoda notranjih tock prediktor korektor
 %   optimizacijskega problema
@@ -16,10 +16,12 @@ function [ vrednost,x,y,s, iter, napaka] = ipm_lin_predcor( c,A,b,x0,s0,sigma,ep
 %   b desna stran sistema Ax = b predstavljena z matriko velikosti m x 1
 %   x0 zacetni priblizek za resitev opt. problema velikosti n x 1 veljati
 %   mora da je x0 strogo pozitiven
-%   s0 zacetni priblizek za resitev dopolnilnih spremenljivk dualnega opt. problema
-%       velikosti m x 1 veljati mora da je s0 strogo pozitiven
+%   y0 zacetni priblizek za resitev dualnega opt. problema velikosti m x 1
+%       veljati mora da je y0 pozitiven
 %   sigma vrednost, ki doloca premik proti srediscni poti default vrednost sigma
 %       je sigma = 0.5
+%   faktor je vrednost med 0<faktor<1, ki pove s kaksnim faktorjem manjsamo iskanje
+%       alfe pri newtnovi metodi v smeri x in s. Default value = 0.8
 %   eps je vrednost, ki nam pove toleranco napake dobljene resitve
 %       default vrednost natancnosti je eps = 1e-6
 %   maxit pove maksimalno stevilo iteracij, ki jih izvedemo
@@ -40,15 +42,18 @@ if nargin < 6
     sigma = 0.5;
 end
 if nargin < 7
-    eps = 1e-6;
+    faktor = 0.8;
 end
 if nargin < 8
+    eps = 1e-6;
+end
+if nargin < 9
     maxit = 100;
 end
 
 x=x0;
-s = s0;
-y = A' \(c-s);
+y = y0;
+s = c - A'*y0;
 
 %prvi korak predikotor
 
@@ -82,7 +87,7 @@ while napakax
     if prod(double(xtemp > 0)) > 0
         napakax = false;
     else
-        alfap = alfap - 0.05;
+        alfap = faktor * alfap;
     end          
 end
 
@@ -95,7 +100,7 @@ while napakas
     if prod(double(stemp > 0)) > 0
         napakas = false;
     else
-        alfad = alfad - 0.05;
+        alfad = faktor * alfad;
     end          
 end
 
@@ -107,8 +112,8 @@ s = stemp;
 %dobili smo dopustne resitve v strogi notranjosti zato lahko pozenemo
 %metodo ipm_lin_longstep na x,y
 
-[ vrednost,x,y,s, iter, napaka] = ipm_lin_longstep( c,A,b,x,y,sigma,eps,maxit);
-
+[ vrednost,x,y,s, iter, napaka] = ipm_lin_longstep( c,A,b,x,y,sigma,faktor,eps,maxit);
+iter = iter+1; %kot en korak stejemo se predikotor in korektor
 
 
 

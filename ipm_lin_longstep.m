@@ -1,4 +1,4 @@
-function [ vrednost,x,y,s, iter, napaka] = ipm_lin_longstep( c,A,b,x0,y0,sigma,eps,maxit)
+function [ vrednost,x,y,s, iter, napaka] = ipm_lin_longstep( c,A,b,x0,y0,sigma,faktor,eps,maxit)
 % Opis:
 %   ipm_lin_longstep metoda notranjih tock z dolgim korakom za resevanje
 %   optimizacijskega problema
@@ -20,6 +20,8 @@ function [ vrednost,x,y,s, iter, napaka] = ipm_lin_longstep( c,A,b,x0,y0,sigma,e
 %       strogi notranjosti  glede na pogoje duala
 %   sigma vrednost, ki doloca premik proti srediscni poti default vrednost sigma
 %       je sigma = 0.5
+%   faktor je vrednost med 0<faktor<1, ki pove s kaksnim faktorjem manjsamo iskanje
+%       alfe pri newtnovi metodi v smeri x in s. Default value = 0.8
 %   eps je vrednost, ki nam pove toleranco napake dobljene resitve
 %       default vrednost natancnosti je eps = 1e-6
 %   maxit pove maksimalno stevilo iteracij, ki jih izvedemo
@@ -40,9 +42,12 @@ if nargin < 6
     sigma = 0.5;
 end
 if nargin < 7
-    eps = 1e-6;
+    faktor = 0.8;
 end
 if nargin < 8
+    eps = 1e-6;
+end
+if nargin < 9
     maxit = 100;
 end
 
@@ -51,12 +56,10 @@ x=x0;
 y=y0;
 s=c-A'*y;
 
-
-
 iter = 0;
 napaka = x'*s;
 
-while (napaka > eps) && (iter < maxit) 
+while ((napaka > eps) || (norm(A*x-b)> eps) || norm(A'*y + s- c)>eps ) && (iter < maxit) 
     iter = iter +1;
     tau = (x'*s)/n;
     mu = sigma*tau;
@@ -77,7 +80,7 @@ while (napaka > eps) && (iter < maxit)
         if prod(double(xtemp > 0)) > 0
             napakax = false;
         else
-            alfap = alfap - 0.05;
+            alfap = faktor * alfap;
         end          
     end
     
@@ -90,7 +93,7 @@ while (napaka > eps) && (iter < maxit)
         if prod(double(stemp > 0)) > 0
             napakas = false;
         else
-            alfad = alfad - 0.05;
+            alfad = faktor * alfad;
         end          
     end
     
