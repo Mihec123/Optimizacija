@@ -55,67 +55,72 @@ x=x0;
 y = y0;
 s = c - A'*y0;
 
-%prvi korak predikotor
+napaka = x'*s;
 
-rp = b-A*x;
-rd = c - A'*y-s;
-rc = - x.*s;
-X = diag(x);
-S = diag(s);
+iter = 0;
 
-dy1 = (A*inv(S)*X*A') \ (rp-A*inv(S)*(rc-x.*rd));
-ds1 = rd - A'*dy1;
-dx1 = S \ (rc-X*ds1);
+while ((napaka > eps) || (norm(A*x-b)> eps) || norm(A'*y + s- c)>eps ) && (iter < maxit) 
 
-%drugi korak korektor
+    iter = iter+1;
+    %prvi korak predikotor
 
-tau = (x'*s)/n;
-mu = sigma*tau;
-rcc = mu*ones(n,1) - x.*s - dx1.*ds1;
+    rp = b-A*x;
+    rd = c - A'*y-s;
+    rc = - x.*s;
+    X = diag(x);
+    S = diag(s);
 
-dy = (A*inv(S)*X*A') \ (rp-A*inv(S)*(rcc-x.*rd));
-ds = rd - A'*dy;
-dx = S \ (rcc-X*ds);
+    dy1 = (A*inv(S)*X*A') \ (rp-A*inv(S)*(rc-x.*rd));
+    ds1 = rd - A'*dy1;
+    dx1 = S \ (rc-X*ds1);
+
+    %drugi korak korektor
+
+    tau = (x'*s)/n;
+    mu = sigma*tau;
+    rcc = mu*ones(n,1) - x.*s - dx1.*ds1;
+
+    dy = (A*inv(S)*X*A') \ (rp-A*inv(S)*(rcc-x.*rd));
+    ds = rd - A'*dy;
+    dx = S \ (rcc-X*ds);
+
+    %pogledamo kako velik korak lahko naredimo v smeri x da smo
+    %se dopustni
+    alfap = 1;
+    napakax = true;
+    while napakax
+        xtemp = x+alfap*dx;      
+        if prod(double(xtemp > 0)) > 0
+            napakax = false;
+        else
+            alfap = faktor * alfap;
+        end          
+    end
+
+    %pogledamo kako velik korak lahko naredimo v smeri s da smo
+    %se dopustni
+    alfad = 1;
+    napakas = true;
+    while napakas
+        stemp = s+alfad*ds;
+        if prod(double(stemp > 0)) > 0
+            napakas = false;
+        else
+            alfad = faktor * alfad;
+        end          
+    end
 
 
-%pogledamo kako velik korak lahko naredimo v smeri x da smo
-%se dopustni
-alfap = 1;
-napakax = true;
-while napakax
-    xtemp = x+alfap*dx;      
-    if prod(double(xtemp > 0)) > 0
-        napakax = false;
-    else
-        alfap = faktor * alfap;
-    end          
+    x = xtemp;
+    y = y + alfad*dy;
+    s = stemp;
+    
+    napaka = x'*s;
+    
+
 end
 
-%pogledamo kako velik korak lahko naredimo v smeri s da smo
-%se dopustni
-alfad = 1;
-napakas = true;
-while napakas
-    stemp = s+alfad*ds;      
-    if prod(double(stemp > 0)) > 0
-        napakas = false;
-    else
-        alfad = faktor * alfad;
-    end          
-end
-
-x = xtemp;
-y = y + alfad*dy;
-s = stemp;
-
-
-%dobili smo dopustne resitve v strogi notranjosti zato lahko pozenemo
-%metodo ipm_lin_longstep na x,y
-
-[ vrednost,x,y,s, iter, napaka] = ipm_lin_longstep( c,A,b,x,y,sigma,faktor,eps,maxit);
-iter = iter+1; %kot en korak stejemo se predikotor in korektor
-
-
+vrednost = c'*x;
 
 end
 

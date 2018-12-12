@@ -7,7 +7,7 @@ c = [-1 -3 -4];
 
 [ vrednost,x,y,s, iter, napaka] = ipm_lin_shortstep( c',A,b',[1/3 1/3 1/3]',[-5])
 [ vrednost,x,y,s, iter, napaka] = ipm_lin_longstep( c',A,b',[1/3 1/3 1/3]',[-5])
-[ vrednost,x,y,s, iter, napaka] = ipm_lin_predcor( c',A,b',ones(3,1),ones(1,1))
+[ vrednost,x,y,s, iter, napaka] = ipm_lin_predcor( c',A,b',ones(3,1),-5*ones(1,1))
 
 %naloga 3
 randn('state', 0);

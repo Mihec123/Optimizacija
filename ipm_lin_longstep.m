@@ -59,7 +59,7 @@ s=c-A'*y;
 iter = 0;
 napaka = x'*s;
 
-while ((napaka > eps) || (norm(A*x-b)> eps) || norm(A'*y + s- c)>eps ) && (iter < maxit) 
+while (napaka > eps) && (iter < maxit) 
     iter = iter +1;
     tau = (x'*s)/n;
     mu = sigma*tau;
