@@ -1,0 +1,10 @@
+Solutions:
+
+graph				n		m		computational time (sec)		alpha
+brock200_1_clq		200		5066	did not found sol in 2500s		21
+C125-9_complement	125 	787		10.8							34
+CirculantG_47_030	47 		282		0.09							13
+CubicVT26_5			26 		39		0.07							10
+HoG_6575			45 		225		0.5								10
+keller4_clq			171		5100	151								11
+PaleyGraph61		61 		915		1.3								5
