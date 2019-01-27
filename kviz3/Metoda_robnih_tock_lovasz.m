@@ -1,22 +1,19 @@
-function [ Xk,y,vrednost,iter,err_p,err_d ] = Metoda_robnih_tock_sdp( A,C,b,y0,sigma,itermax,napaka )
+function [ Xk,y,vrednost,iter,err_p,err_d ] = Metoda_robnih_tock_lovasz( povezave,C,b,sigma,itermax,napaka )
 % Opis:
-%   Metoda_robnih_tock_sdp metoda robnih tock za
+%   Metoda_robnih_tock_lovasz metoda ki racuna vrednost lovazseve theta
+%   funkcije
 %   optimizacijski problem
-%       min <C,X>
-%       p.p. A(X) = b
-%            X >= 0 (X p.s.d.)
-%
-%       kjer je A(X) = [<A1,X>; ...;<An,X>] in A'(y) = sum (y_i.*Ai)
+%       max <J,X>
+%       p.p tr(X) = 1
+%           X_ij = 0 za ij in E
+%           X s.p.d
 % Definicija:
-%   [ Xk,y,vrednost,iter,err_p,err_d ] = Metoda_robnih_tock_sdp( A,c,b,y,X0,sigma,itermax,napaka )
+%   [ Xk,y,vrednost,iter,err_p,err_d ] = Metoda_robnih_tock_lovasz( povezave,C,b,sigma,itermax,napaka )
 %
 % Vhodni  podatki:
 %   C minimizacijska m1 x m1 matrika
-%   A matrika velikosti n x m kjer vsaka vrstica predstavlja matriko Ai(:)'
-%       in velja da je matrika Ai velikosti m1 x m1
+%   povezave matrika m x 2, ki pove katere tocke so povezane
 %   b desna stran sistema A(X) = b predstavljena z matriko velikosti n x 1
-%   y0 zacetni priblizek za resitev dualnega opt. problema velikosti n x 1
-%       veljati mora da je y0 pozitiven
 %   sigma vrednost, ki doloca premik proti srediscni poti default vrednost sigma
 %       je sigma = 0.5
 %   napaka je vrednost, ki nam pove toleranco napake dobljene resitve
@@ -30,19 +27,21 @@ function [ Xk,y,vrednost,iter,err_p,err_d ] = Metoda_robnih_tock_sdp( A,C,b,y0,s
 %   y matrika n x 1 vrednosti y dualnega problema
 %   Z matrika m1 x m1 vrednosti dopolnilnih spremenljivk dualnega problema
 %   iter stevilo iteracij, ki jih je metoda izvedla
-%   napaka velikost napake metode merjene kot X(:)'*Z(:)
+%   err_p velikost napake primarnega programa
+%   err_d velikost napake dualnega programa
 
-if nargin < 6
+if nargin < 4
     sigma = 0.5;
 end
 
-if nargin < 7
-    itermax = 2000;
+if nargin < 5
+    itermax = 2100;
 end
-if nargin < 8
+if nargin < 6
     napaka = 1e-6;
 end
 
+disp(itermax)
 iter = 0;
 err_p = Inf;
 err_d = Inf;
@@ -50,38 +49,47 @@ err_d = Inf;
 [n,~] = size(C);
 Xk = zeros(n);
 
-y = y0;
+y = rand(length(b),1);
+delimo = 2*ones(length(b),1);
+delimo(end) =  n;
 
-V1 = chol(A*A','lower');
+operatory = operatorAt(y,povezave,n);
 
 while (iter < itermax) && ((err_p > napaka) || (err_d > napaka))
-    W = reshape(A'*y,[n,n]) - C - 1/sigma*Xk;
+    
+    W = operatory - C - 1/sigma*Xk;
     [V,D] = eig(W);
     plus = max(D,0);
     minus = min(D,0);
-    Zk = V*plus*inv(V);
-    Xk = -sigma*V*minus*inv(V);
-    %normalno
-    %y = (A*A')\(A*(Zk(:)+C(:))+1/sigma*(A*Xk(:)-b));
+    Zk = V*plus*V';
+    Xk = -sigma*V*minus*V';
+    %specialno za stable set
+    opA = operatorA(Zk+C,povezave);
+    opA1 = operatorA(Xk,povezave);
+    y = (opA+1/sigma*(opA1-b))./delimo;
     
-    
-    %nardimo choleskega
-    y1 = V1\(A*(Zk(:)+C(:))+1/sigma*(A*Xk(:)-b));
-    y = V1'\y1;
+    operatory = operatorAt(y,povezave,n);
+
     
     iter = iter+1;
     
-    err_p = norm(A*Xk(:)-b);
-    err_d = norm(Zk-reshape(A'*y,[n,n])+C);
-    if mod(iter,10) == 0
+    err_p = norm(opA1-b);
+    err_d = norm(Zk-operatory+C);
+    if mod(iter,100) == 0
+        vrednost = C(:)'*Xk(:);
         text = strcat('iter: ',int2str(iter));
         text = strcat(text,'  err_p: ');
         text = strcat(text,num2str(err_p));
         text = strcat(text,'  err_d: ');
         text = strcat(text,num2str(err_d));
+        text = strcat(text,'  vrednost: ');
+        text = strcat(text,num2str(vrednost));
         disp(text)
     end
 end
 vrednost = C(:)'*Xk(:);
 end
+
+
+
 

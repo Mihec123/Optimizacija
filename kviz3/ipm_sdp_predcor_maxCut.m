@@ -1,21 +1,17 @@
-function [ vrednost,X,y,Z, iter, napaka] = ipm_sdp_predcor( c,A,b,X0,y0,sigma,faktor,eps,maxit)
+function [ vrednost,X,y,Z, iter, napaka] = ipm_sdp_predcor_maxCut( C,b,X0,y0,sigma,faktor,eps,maxit)
 % Opis:
-%   ipm_sdp_predcor metoda notranjih tock prediktor korektor
+%   ipm_sdp_predcor_maxCut metoda notranjih tock prediktor korektor
+%   prilagojena za problem maxcut
 %   optimizacijskega problema
-%       min <C,X>
-%       p.p. A(X) = b
+%       min 1/4<L,X>
+%       p.p. diag(X) = e
 %            X >= 0 (X p.s.d.)
 %
-%       kjer je A(X) = [<A1,X>; ...;<An,X>] in A'(y) = sum (y_i.*Ai)
 % Definicija:
-%   [ vrednost,x,y,s, iter, napaka] = ipm_sdp_predcor( c,A,b,x0,y0,sigma,natancnost,maxit)
+%   [ vrednost,x,y,s, iter, napaka] = ipm_sdp_predcor_maxCut( c,b,x0,y0,sigma,natancnost,maxit)
 %
 % Vhodni  podatki:
-%   c minimizacijska funkcija (min c'*X(:)) predstavljena z matriko
-%       velikosti m x 1, kjer je c = C(:) in C neka m1 x m1 matrika torej
-%       za m velja m = m1*m1
-%   A matrika velikosti n x m kjer vsaka vrstica predstavlja matriko Ai(:)'
-%       in velja da je matrika Ai velikosti m1 x m1
+%   C minimizacijska funkcija ki mora predstavljati Laplaceovo matriko velikosti m1 x m1 
 %   b desna stran sistema A(X) = b predstavljena z matriko velikosti n x 1
 %   X0 zacetni priblizek za resitev opt. problema velikosti m1 x m1 veljati
 %       mora da je X0 strogo pozitivno definitna
@@ -40,29 +36,27 @@ function [ vrednost,X,y,Z, iter, napaka] = ipm_sdp_predcor( c,A,b,X0,y0,sigma,fa
 
 
 %velikosti v funkciji se ne ujemajo z oznakami iz opisa
-[n,~] = size(A);
+n = length(b);
 [n1,m1] = size(X0);
 
-if nargin < 6
+if nargin < 5
     sigma = 0.5;
 end
-if nargin < 7
+if nargin < 6
     faktor = 0.8;
 end
-if nargin < 8
+if nargin < 7
     eps = 1e-6;
 end
-if nargin < 9
-    maxit = 100;
+if nargin < 8
+    maxit = 50;
 end
 
 X=X0;
 y = y0;
-At = transp_operator(A,y,n1);
-C = reshape(c,[n1,m1]);
-Z = C - At;
+Z = C - diag(y);
 
-napaka = X(:)'*Z(:);
+napaka = Inf;
 
 iter = 0;
 
@@ -72,47 +66,58 @@ while (napaka > eps) && (iter < maxit)
     iter = iter+1;
     %prvi korak predikotor
 
-    rp = b-A*X(:); %tega ne rabmo razn za gledat razliko
+    %rp = b-A*X(:); %tega ne rabmo razn za gledat razliko
     
     %dolocimo A'(y)
-    At = transp_operator(A,y,n1);
+%     At = transp_operator(A,y,n1);
     
-    rd = C - At-Z;
+%     rd1  =C - At-Z;   
+    rd = C - diag(y)-Z;
     rc = -Z*X;
-    
-    
-    M = zeros(n);
+
+    M = zeros(n,1); %samo diagonala od M razlicna od nic si shranmo kot vektor
     Zinv = inv(Z);
     
     %dolocimo matriko M (mogoce ksn bols nacin to nardit)
     for i = 1:n
         for j=1:n
-            M(i,j) = trace(reshape(A(i,:),[n1,m1])*Zinv*reshape(A(j,:),[n1,m1])*X);
+            M(i,j) = Zinv(i,j)*X(i,j);
         end
     end
     
+%     M1 = zeros(n);
+%     for i = 1:n
+%         for j=1:n
+%             M1(i,j) = trace(reshape(A(i,:),[n1,m1])*Zinv*reshape(A(j,:),[n1,m1])*X);
+%         end
+%     end
+    
     
     temp = Zinv*rd*X;
-    dy1 = M\(b+A*temp(:));
+%     dy11 = M1\(b+A*temp(:));
+    dy1 = M\(b+diag(temp));
     
     %dolocimo A'(dy1)
-    At = transp_operator(A,dy1,n1);
+    %At = transp_operator(A,dy1,n1);
     
-    dZ1 = rd-At;
+    dZ1 = rd-diag(dy1);
+%     dZ11 = rd-At;
     dX1 = Z\(rc-dZ1*X);
 
     %drugi korak korektor
 
-    tau = (X(:)'*Z(:))/(n1*m1); %to je vprasljivo ce prov
+    tau = (X(:)'*Z(:))/(n1); %to je vprasljivo ce prov
     mu = sigma*tau;
     rcc = mu*eye(n1)-Z*X-dZ1*dX1;
     
     temp1 =Zinv*dZ1*dX1;
-    dy = M\(b+A*temp(:) - mu*(A*Zinv(:)) + A*temp1(:));
+    dy = M\(b+diag(temp) - mu*(diag(Zinv)) + diag(temp1));
 
+%     dyy = M1\(b+A*temp(:) - mu*(A*Zinv(:)) + A*temp1(:));
     %dolocimo A'(dy)
-    At = transp_operator(A,dy,n1);
-    dZ = rd - At;
+    %At = transp_operator(A,dy,n1);
+    dZ = rd - diag(dy);
+%     dZZ = rd - At;
     dX = Z \ (rcc-dZ*X);
     
     dX = (dX+dX')./2;
@@ -150,8 +155,9 @@ while (napaka > eps) && (iter < maxit)
     y = y + alfad*dy;
     Z = Z+alfad.*dZ;
     
-    napaka = X(:)'*Z(:);
-    if mod(iter,2)
+    napaka = max(X(:)'*Z(:));
+    
+     if mod(iter,2)
         vrednost = C(:)'*X(:);
         text = strcat('iter: ',int2str(iter));
         text = strcat(text,'  err: ');
@@ -164,10 +170,9 @@ while (napaka > eps) && (iter < maxit)
 
 end
 
-vrednost = c'*X(:);
+vrednost = C(:)'*X(:);
 
 end
-
 
 
 function At = transp_operator(A,vektor,velikost)

@@ -21,4 +21,6 @@ P = 0.5*(P+P');
 q = randn(n,1);
 
 
+tic;
 [ x,vrednost,err_p,err_d,iter] = okrepljena_lagrangeeva_metoda_kvadraticni( P,q,A,b,0.0005,1000,1e-4);
+toc
