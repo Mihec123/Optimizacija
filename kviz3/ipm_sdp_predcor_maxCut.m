@@ -36,9 +36,9 @@ function [ vrednost,X,y,Z, iter, napaka] = ipm_sdp_predcor_maxCut( C,b,X0,y0,sig
 
 
 %velikosti v funkciji se ne ujemajo z oznakami iz opisa
-n = length(b);
+%n = length(b);
 [n1,m1] = size(X0);
-
+n = n1;
 if nargin < 5
     sigma = 0.5;
 end
@@ -49,7 +49,7 @@ if nargin < 7
     eps = 1e-6;
 end
 if nargin < 8
-    maxit = 50;
+    maxit = 100;
 end
 
 X=X0;
@@ -75,13 +75,13 @@ while (napaka > eps) && (iter < maxit)
     rd = C - diag(y)-Z;
     rc = -Z*X;
 
-    M = zeros(n,1); %samo diagonala od M razlicna od nic si shranmo kot vektor
+    M = zeros(n); %samo diagonala od M razlicna od nic si shranmo kot vektor
     Zinv = inv(Z);
     
     %dolocimo matriko M (mogoce ksn bols nacin to nardit)
     for i = 1:n
         for j=1:n
-            M(i,j) = Zinv(i,j)*X(i,j);
+            M(i,j) = Zinv(i,j)*X(j,i);
         end
     end
     
