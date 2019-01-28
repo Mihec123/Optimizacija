@@ -30,7 +30,7 @@ function [ Xk,y,D1,Zk,vrednost,iter,err_p,err_d ] = okrepljena_lagrangeva_metoda
 %   err_d napaka dualnega problema
 
 if nargin < 6
-    itermax = 2000;
+    itermax = 500;
 end
 if nargin < 7
     napaka = 1e-6;
@@ -58,7 +58,7 @@ while (iter < itermax) && ((err_p > napaka) || (err_d > napaka))
     %test = operatorAt(y,povezave,n)-C;
     %Zk(test-Zk<=0) = test(test-Zk<=0);
     Xk = -sigma*V*minus*V';
-    D1 = max(0,C+Zk-operatorAt(y,povezave,n)-1/sigma*Xk);
+    D1 = max(0,-C-Zk+operatorAt(y,povezave,n)-1/sigma*Xk);
     %specialno za stable set
     y = (operatorA(Zk+C+D1,povezave)+1/sigma*(operatorA(Xk,povezave)-b))./delimo;
     %y = (operatorA(Zk+C,povezave)+1/sigma*(operatorA(Xk,povezave)-b))./delimo;
@@ -69,7 +69,7 @@ while (iter < itermax) && ((err_p > napaka) || (err_d > napaka))
     err_p = norm(operatorA(Xk,povezave)-b);
     err_d = norm(Zk-operatorAt(y,povezave,n)+C+D1);
     %err_d = norm(Zk-operatorAt(y,povezave,n)+C);
-    if mod(iter,100) == 0
+    if mod(iter,1) == 0
         vrednost = b'*y;
         text = strcat('iter: ',int2str(iter));
         text = strcat(text,'  err_p: ');
