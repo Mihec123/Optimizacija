@@ -49,7 +49,7 @@ if nargin < 7
     eps = 1e-6;
 end
 if nargin < 8
-    maxit = 100;
+    maxit = 50;
 end
 
 X=X0;
@@ -57,16 +57,18 @@ y = y0;
 Z = C - diag(y);
 
 napaka = Inf;
+err_d = Inf;
+err_p = Inf;
 
 iter = 0;
 
 
-while (napaka > eps) && (iter < maxit)
+while (iter < maxit) && ((napaka > eps) || err_p> eps || err_d>eps )
 
     iter = iter+1;
     %prvi korak predikotor
 
-    %rp = b-A*X(:); %tega ne rabmo razn za gledat razliko
+    rp = b-diag(X); %tega ne rabmo razn za gledat razliko
     
     %dolocimo A'(y)
 %     At = transp_operator(A,y,n1);
@@ -94,9 +96,8 @@ while (napaka > eps) && (iter < maxit)
     
     
     temp = Zinv*rd*X;
-%     dy11 = M1\(b+A*temp(:));
     dy1 = M\(b+diag(temp));
-    
+    %dy1 = M\(rp+diag(temp)-diag(Zinv*rc));
     %dolocimo A'(dy1)
     %At = transp_operator(A,dy1,n1);
     
@@ -156,6 +157,8 @@ while (napaka > eps) && (iter < maxit)
     Z = Z+alfad.*dZ;
     
     napaka = max(X(:)'*Z(:));
+    err_d = norm(diag(y) + Z- C);
+    err_p = norm(diag(X)-b);
     
      if mod(iter,2)
         vrednost = C(:)'*X(:);
@@ -164,6 +167,10 @@ while (napaka > eps) && (iter < maxit)
         text = strcat(text,num2str(napaka));
         text = strcat(text,'  vrednost: ');
         text = strcat(text,num2str(vrednost));
+        text = strcat(text,'  err_p: ');
+        text = strcat(text,num2str(err_p));
+        text = strcat(text,'  err_d: ');
+        text = strcat(text,num2str(err_d));
         disp(text)
     end
     
